@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#eef1fb" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#05060d" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Payments">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<title>Payment Records</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eef1fb; --text:#1D1D1F; --t2:rgba(29,29,31,.62); --t3:rgba(29,29,31,.4);
+  --glass:rgba(255,255,255,.62); --glass-solid:#f7f8fd; --hair:rgba(20,30,70,.10); --hl:rgba(255,255,255,.9);
+  --shadow:0 8px 30px rgba(40,60,140,.12);
+  --accent:#007aff; --accent-soft:rgba(0,122,255,.12);
+  --good:#0a7d1c; --bad:#c9302c; --warn:#b86e00; --fin:#e08600; --fin-soft:rgba(224,134,0,.14);
+  --s1:#257de0; --s2:#f47230; --s3:#00b894; --s4:#f2a600;
+  --grid:#e3e6f0; --axis:#c2c6d6;
+  --g1:rgba(10,132,255,.18); --g2:rgba(191,90,242,.14); --g3:rgba(100,210,255,.16); --g4:rgba(255,100,130,.10);
+  --ease:cubic-bezier(.22,1,.36,1); --spring:cubic-bezier(.34,1.56,.64,1);
+  --font:-apple-system,BlinkMacSystemFont,'SF Pro Text','IBM Plex Sans Thai','Sukhumvit Set','Noto Sans Thai','Noto Sans JP',system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#05060d; --text:#F5F5F7; --t2:rgba(245,245,247,.62); --t3:rgba(245,245,247,.4);
+    --glass:rgba(255,255,255,.08); --glass-solid:#14162a; --hair:rgba(255,255,255,.16); --hl:rgba(255,255,255,.2);
+    --shadow:0 10px 40px rgba(0,0,0,.45);
+    --accent:#0a84ff; --accent-soft:rgba(10,132,255,.2);
+    --good:#53c556; --bad:#ff6b6b; --warn:#ffb340; --fin:#ffa21f; --fin-soft:rgba(255,162,31,.18);
+    --s1:#338ced; --s2:#e76624; --s3:#00a888; --s4:#d28e05;
+    --grid:#303030; --axis:#474747;
+    --g1:rgba(10,132,255,.30); --g2:rgba(191,90,242,.24); --g3:rgba(100,210,255,.18); --g4:rgba(255,100,130,.16);
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;min-height:100dvh;
+  -webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums;overscroll-behavior-y:none}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+   radial-gradient(60% 40% at 8% 0%,var(--g1),transparent 70%),
+   radial-gradient(50% 36% at 100% 12%,var(--g2),transparent 70%),
+   radial-gradient(60% 40% at 90% 100%,var(--g3),transparent 70%),
+   radial-gradient(50% 36% at 0% 92%,var(--g4),transparent 70%)}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;padding:0}
+input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:560px;margin:0 auto;padding:0 16px calc(96px + env(safe-area-inset-bottom))}
+.glass{background:var(--glass);border:1px solid var(--hair);border-radius:22px;
+  box-shadow:inset 0 1px 0 var(--hl),var(--shadow);
+  -webkit-backdrop-filter:blur(28px) saturate(1.9);backdrop-filter:blur(28px) saturate(1.9)}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.glass{background:var(--glass-solid)}}
+
+/* header */
+.top{position:sticky;top:0;z-index:20;margin:0 -16px;padding:calc(10px + env(safe-area-inset-top)) 16px 10px;
+  background:color-mix(in srgb,var(--bg) 88%,transparent);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+.brand{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand h1{margin:0;font-size:20px;font-weight:700;letter-spacing:-.01em;line-height:1.15}
+.brand small{display:block;font-size:12px;color:var(--t3);font-weight:500;margin-top:1px}
+.iconbtn{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;color:var(--t2)}
+.iconbtn:active{background:var(--accent-soft)}
+.iconbtn svg.spin{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.seg{display:flex;gap:4px;padding:4px;border-radius:14px;background:var(--glass);border:1px solid var(--hair);margin-top:8px;overflow-x:auto;scrollbar-width:none}
+.seg::-webkit-scrollbar{display:none}
+.seg button{flex:1 0 auto;min-height:36px;padding:0 14px;border-radius:10px;font-size:14px;font-weight:500;color:var(--t2);white-space:nowrap;transition:background .25s var(--ease)}
+.seg button[aria-pressed="true"],.seg button[aria-selected="true"]{background:var(--accent);color:#fff;font-weight:600}
+
+/* month strip */
+.yearbar{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+.yearbar .yr{font-size:15px;font-weight:600}
+.months{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:6px 0 2px;margin:0 -16px;padding-left:16px;padding-right:16px;scroll-snap-type:x proximity}
+.months::-webkit-scrollbar{display:none}
+.mchip{flex:0 0 auto;scroll-snap-align:center;min-width:52px;height:48px;border-radius:14px;border:1px solid var(--hair);background:var(--glass);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:14px;font-weight:500;color:var(--t2)}
+.mchip i{width:6px;height:6px;border-radius:50%;background:transparent}
+.mchip i.done{background:var(--good)}
+.mchip i.part{background:var(--warn)}
+.mchip[aria-current="true"]{background:var(--accent);border-color:transparent;color:#fff;font-weight:600}
+.mchip[aria-current="true"] i.done,.mchip[aria-current="true"] i.part{background:#fff}
+.mchip[disabled]{opacity:.35}
+
+/* hero */
+.hero{padding:20px 20px 18px;margin-top:10px}
+.hero .lbl{font-size:13px;color:var(--t2);font-weight:500}
+.hero .big{font-size:40px;font-weight:700;letter-spacing:-.02em;line-height:1.1;margin:4px 0 2px;
+  background:linear-gradient(100deg,#7cc0ff,#0a84ff 45%,#bf5af2);-webkit-background-clip:text;background-clip:text;color:transparent}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .hero .big{background:linear-gradient(100deg,#0a84ff,#6a4ce2 60%,#bf3fd0);-webkit-background-clip:text;background-clip:text}}
+.bar{height:10px;border-radius:6px;background:var(--hair);overflow:hidden;margin:14px 0 8px;display:flex}
+.bar b{display:block;height:100%;transition:width .5s var(--ease)}
+.bar b.p{background:var(--accent)}
+.bar b.f{background:var(--fin)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--t2);margin-top:2px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.prog{display:flex;justify-content:space-between;font-size:13px;color:var(--t2)}
+.prog strong{color:var(--text);font-weight:600}
+.cmp{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:12px;padding-top:12px;border-top:1px solid var(--hair);font-size:13px;color:var(--t2)}
+.dl{font-weight:600;white-space:nowrap}
+.dl.up{color:var(--bad)} .dl.dn{color:var(--good)} .dl.eq{color:var(--t2)}
+
+/* actions */
+.actions{display:flex;gap:10px;margin:14px 0 4px}
+.btn{min-height:48px;padding:0 18px;border-radius:14px;font-weight:600;font-size:15px;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:transform .2s var(--spring)}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--accent);color:#fff;flex:1}
+.btn.ghost{background:var(--glass);border:1px solid var(--hair)}
+.btn[disabled]{opacity:.4;pointer-events:none}
+
+/* list */
+.sect{display:flex;align-items:baseline;justify-content:space-between;margin:22px 4px 8px;font-size:14px;font-weight:600}
+.sect span{font-size:12px;color:var(--t3);font-weight:500}
+.list{overflow:hidden;padding:0}
+.row{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:10px 14px 10px 8px;min-height:64px}
+.row+.row{border-top:1px solid var(--hair)}
+.chk{width:44px;height:44px;flex:0 0 44px;display:grid;place-items:center}
+.chk span{width:26px;height:26px;border-radius:50%;border:2px solid var(--t3);display:grid;place-items:center;transition:all .25s var(--spring);color:transparent}
+.chk span svg{width:14px;height:14px}
+.chk[aria-pressed="true"] span{background:var(--accent);border-color:var(--accent);color:#fff;transform:scale(1.05)}
+.chk.fin span{border-color:var(--fin);background:var(--fin-soft)}
+.chk.fin span svg{display:none}
+.chk.fin span::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--fin)}
+.rbody{flex:1;min-width:0;cursor:pointer}
+.rname{font-size:15px;font-weight:600;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rsub{font-size:12px;color:var(--t3);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ramt{text-align:right;cursor:pointer;flex:0 0 auto}
+.ramt b{display:block;font-size:16px;font-weight:600}
+.ramt small{display:block;font-size:11px;color:var(--t3);margin-top:1px}
+.row.paid .ramt b{color:var(--accent)}
+.row.fin .ramt b{color:var(--fin)}
+.empty{padding:28px 16px;text-align:center;color:var(--t2);font-size:14px}
+details.none summary{list-style:none;cursor:pointer;padding:14px;font-size:13px;color:var(--t2);display:flex;justify-content:space-between;min-height:48px;align-items:center}
+details.none summary::-webkit-details-marker{display:none}
+
+/* cards / kpi */
+.card{padding:16px;margin-top:14px}
+.card h2{margin:0 0 2px;font-size:16px;font-weight:600}
+.card .sub{font-size:12px;color:var(--t3);margin-bottom:10px}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.kpi{padding:14px}
+.kpi .k{font-size:12px;color:var(--t2);font-weight:500}
+.kpi .v{font-size:22px;font-weight:700;letter-spacing:-.01em;margin:4px 0 2px}
+.kpi .d{font-size:12px;color:var(--t2)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 10px}
+.chip{min-height:36px;padding:0 12px;border-radius:18px;border:1px solid var(--hair);background:var(--glass);font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:7px}
+.chip i{width:10px;height:10px;border-radius:3px}
+.chip[aria-pressed="false"]{opacity:.45}
+.chip[aria-pressed="false"] i{background:var(--t3)!important}
+.chartbox{position:relative;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.chartbox svg{display:block;width:100%;height:auto;overflow:visible}
+.tip{position:absolute;top:0;pointer-events:none;background:var(--glass-solid);border:1px solid var(--hair);border-radius:12px;padding:8px 10px;font-size:12px;box-shadow:var(--shadow);min-width:120px;z-index:3;opacity:0;transition:opacity .15s}
+.tip b{display:block;font-size:12px;margin-bottom:4px}
+.tip div{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.tip div span:first-child{display:flex;align-items:center;gap:6px;color:var(--t2)}
+.tip i{width:8px;height:8px;border-radius:50%}
+table.t{width:100%;border-collapse:collapse;font-size:13px}
+table.t th{font-weight:500;color:var(--t2);text-align:right;padding:8px 6px;border-bottom:1px solid var(--hair);white-space:nowrap}
+table.t td{text-align:right;padding:9px 6px;border-bottom:1px solid var(--hair)}
+table.t th:first-child,table.t td:first-child{text-align:left;padding-left:0;white-space:nowrap}
+table.t tr:last-child td{border-bottom:0}
+.note{font-size:12px;color:var(--t3);margin-top:8px}
+.badge{font-size:11px;padding:2px 7px;border-radius:8px;background:var(--accent-soft);color:var(--accent);font-weight:600;margin-left:6px}
+.select{min-height:44px;border-radius:12px;border:1px solid var(--hair);background:var(--glass);padding:0 12px;font:inherit;color:inherit}
+.select option{color:#000}
+.catrow{margin:12px 0}
+.catrow .h{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px}
+.catrow .h span:first-child{font-weight:600}
+.cbar{display:flex;align-items:center;gap:8px;margin:3px 0;font-size:11px;color:var(--t2)}
+.cbar .trk{flex:1;height:8px}
+.cbar .trk b{display:block;height:100%;border-radius:0 4px 4px 0;min-width:2px}
+.cbar em{font-style:normal;min-width:70px;text-align:right;color:var(--text)}
+.cbar u{text-decoration:none;min-width:34px;color:var(--t3)}
+
+/* items */
+.search{width:100%;height:44px;border-radius:12px;border:1px solid var(--hair);background:var(--glass);padding:0 14px;font-size:15px;margin:6px 0 4px}
+.search:focus{outline:none;box-shadow:0 0 0 4px rgba(10,132,255,.28);border-color:var(--accent)}
+.irow .spark{flex:0 0 64px}
+.irow .rname{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.irow .ramt small{font-size:12px}
+
+/* bank summary */
+.banks{padding:6px 0;margin-top:14px;overflow:hidden}
+.banks h2{margin:0;padding:14px 16px 4px;font-size:16px;font-weight:600}
+.banks .sub{padding:0 16px 6px;font-size:12px;color:var(--t3)}
+.brow{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:10px 16px;min-height:60px;border-top:1px solid var(--hair)}
+.brow[aria-pressed="true"]{background:var(--accent-soft)}
+.brow .bn{flex:1;min-width:0}
+.brow .bn b{display:block;font-size:15px;font-weight:600}
+.brow .bn small{display:block;font-size:12px;color:var(--t3);margin-top:1px}
+.brow .bd{text-align:right}
+.brow .bd b{display:block;font-size:17px;font-weight:700}
+.brow .bd small{display:block;font-size:11px;color:var(--t3)}
+.brow.ok .bd b{color:var(--good);font-size:14px}
+.btot{display:flex;justify-content:space-between;padding:12px 16px 10px;border-top:1px solid var(--hair);font-size:14px;font-weight:600}
+.fbar{display:flex;align-items:center;gap:8px;margin:12px 2px 0;font-size:13px;color:var(--t2)}
+.hint2{font-size:12px;color:var(--t3);margin:-2px 4px 8px}
+.seg button[data-st="2"][aria-pressed="true"]{background:var(--fin);color:#1a1000}
+details.adv{margin:8px 0}
+details.adv summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-size:13px;color:var(--accent);font-weight:600;list-style:none}
+details.adv summary::-webkit-details-marker{display:none}
+.pill{min-height:40px;padding:0 14px;border-radius:20px;border:1px solid var(--hair);background:var(--glass);font-size:14px;font-weight:500}
+.pill[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:transparent}
+.err{color:var(--bad);font-size:13px;margin-top:8px;min-height:18px}
+
+/* pwa */
+.banner{margin-top:8px;padding:8px 12px;border-radius:12px;background:var(--fin-soft);border:1px solid var(--hair);font-size:12px;color:var(--text)}
+.hintcard{padding:12px 14px;margin-top:12px;display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--t2);line-height:1.5}
+.hintcard b{color:var(--text)}
+.hintcard button{flex:0 0 40px;height:40px;border-radius:12px;color:var(--t2)}
+body.setup nav.tabs{display:none}
+.setupcard{padding:22px 18px;margin-top:16px}
+.setupcard h2{margin:0 0 4px;font-size:20px}
+.setupcard p{font-size:13px;color:var(--t2);margin:0 0 14px;line-height:1.6}
+.inp.sm{font-size:16px;font-weight:500}
+.sect2{margin:18px 0 6px;font-size:14px;font-weight:600}
+.steps{font-size:13px;color:var(--t2);line-height:1.7;margin:0;padding-left:18px}
+
+/* lock screen */
+body.locked .wrap, body.locked nav.tabs{visibility:hidden}
+.lock{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;overflow:auto;
+  background:
+   radial-gradient(60% 40% at 8% 0%,var(--g1),transparent 70%),
+   radial-gradient(50% 36% at 100% 12%,var(--g2),transparent 70%),
+   radial-gradient(60% 40% at 90% 100%,var(--g3),transparent 70%),
+   radial-gradient(50% 36% at 0% 92%,var(--g4),transparent 70%),var(--bg);
+  padding:calc(20px + env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom))}
+.lock.on{display:flex}
+.lk{width:100%;max-width:320px;text-align:center}
+.lkicon{width:64px;height:64px;margin:0 auto 14px;border-radius:20px;display:grid;place-items:center;color:#fff;
+  background:linear-gradient(135deg,#0a84ff,#bf5af2);box-shadow:0 10px 30px rgba(10,132,255,.35)}
+.lk h2{margin:0;font-size:22px;font-weight:700}
+.lksub{min-height:22px;margin:6px 0 18px;font-size:13px;color:var(--t2)}
+.lksub.err{color:var(--bad);font-weight:600}
+.dots{display:flex;justify-content:center;gap:16px;margin-bottom:26px}
+.dots i{width:14px;height:14px;border-radius:50%;border:2px solid var(--t3);transition:all .15s var(--spring)}
+.dots i.on{background:var(--accent);border-color:var(--accent);transform:scale(1.1)}
+.dots.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-9px)}40%,80%{transform:translateX(9px)}}
+.pad{display:grid;grid-template-columns:repeat(3,76px);gap:14px;justify-content:center}
+.pad .k{width:76px;height:76px;border-radius:50%;background:var(--glass);border:1px solid var(--hair);font-size:28px;font-weight:500;
+  display:grid;place-items:center;-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);transition:transform .15s var(--spring),background .15s}
+.pad .k:active{transform:scale(.92);background:var(--accent-soft)}
+.pad .k.ic{background:transparent;border-color:transparent;color:var(--t2);font-size:24px}
+.lkc{margin-top:20px;min-height:44px;padding:0 20px;font-size:15px;color:var(--accent);font-weight:600}
+
+/* nav */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;padding:8px 16px calc(8px + env(safe-area-inset-bottom));display:flex;justify-content:center;pointer-events:none}
+nav.tabs .in{pointer-events:auto;width:100%;max-width:560px;display:flex;padding:6px;border-radius:24px;gap:4px}
+nav.tabs button{flex:1;min-height:52px;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:12px;font-weight:600;color:var(--t2);transition:background .25s var(--ease)}
+nav.tabs button svg{width:24px;height:24px}
+nav.tabs button[aria-selected="true"]{background:var(--accent-soft);color:var(--accent)}
+
+/* sheet */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:50;opacity:0;pointer-events:none;transition:opacity .25s}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:60;max-width:560px;margin:0 auto;transform:translateY(105%);transition:transform .38s var(--ease);
+  border-radius:26px 26px 0 0;padding:10px 20px calc(20px + env(safe-area-inset-bottom));max-height:92dvh;overflow:auto;background:var(--glass-solid);border:1px solid var(--hair);border-bottom:0}
+.sheet.on{transform:none}
+.grab{width:40px;height:5px;border-radius:3px;background:var(--hair);margin:0 auto 12px}
+.sheet h3{margin:0;font-size:19px;font-weight:700;line-height:1.25}
+.sheet .sub{font-size:13px;color:var(--t2);margin:2px 0 14px}
+.field{margin:12px 0}
+.field label{display:block;font-size:13px;color:var(--t2);font-weight:500;margin-bottom:6px}
+.inp{width:100%;height:52px;border-radius:14px;border:1px solid var(--hair);background:var(--glass);padding:0 14px;font-size:20px;font-weight:600}
+.inp:focus{outline:none;box-shadow:0 0 0 4px rgba(10,132,255,.28);border-color:var(--accent)}
+.two{display:flex;gap:10px}
+.two .inp{flex:1;min-width:0}
+.hint{font-size:12px;color:var(--t3);margin-top:6px}
+.refs{display:flex;gap:10px;margin-top:6px}
+.refs div{flex:1;padding:10px 12px;border-radius:12px;background:var(--glass);border:1px solid var(--hair);font-size:12px;color:var(--t2)}
+.refs b{display:block;color:var(--text);font-size:15px;margin-top:2px}
+
+.toast{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top));transform:translate(-50%,-20px);z-index:80;opacity:0;pointer-events:none;
+  background:var(--glass-solid);border:1px solid var(--hair);box-shadow:var(--shadow);border-radius:16px;padding:6px 8px 6px 16px;display:flex;align-items:center;gap:8px;font-size:14px;width:max-content;max-width:calc(100vw - 32px);transition:all .3s var(--ease)}
+.toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.toast button{color:var(--accent);font-weight:600;min-height:40px;padding:0 12px}
+.skel{height:84px;margin-top:14px;border-radius:22px;background:var(--glass);border:1px solid var(--hair);animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.45}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.hide{display:none!important}
+</style>
+</head>
+<body>
+<script>try{if(localStorage.getItem('pr_lock'))document.body.className='locked'}catch(e){}</script>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div><h1>Payment Records<small>บันทึกการจ่ายเงิน</small></h1></div>
+      <div style="display:flex">
+      <button class="iconbtn" id="settings" aria-label="ตั้งค่า">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      </button>
+      <button class="iconbtn hide" id="lockbtn" aria-label="ล็อกแอพทันที">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="3"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>
+      </button>
+      <button class="iconbtn" id="refresh" aria-label="รีเฟรชข้อมูล">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>
+      </button></div>
+    </div>
+    <div id="banner" class="banner hide" role="status"></div>
+    <div class="seg" id="payby" role="group" aria-label="กรองตามผู้จ่าย"></div>
+    <div id="monthbar" class="hide">
+      <div class="yearbar">
+        <button class="iconbtn" id="yprev" aria-label="ปีก่อนหน้า"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <div class="yr" id="yrlabel"></div>
+        <button class="iconbtn" id="ynext" aria-label="ปีถัดไป"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
+      </div>
+      <div class="months" id="months"></div>
+    </div>
+  </header>
+
+  <main id="main"><div class="skel"></div><div class="skel" style="height:200px"></div></main>
+</div>
+
+<nav class="tabs" aria-label="เมนูหลัก"><div class="in glass" role="tablist">
+  <button role="tab" data-tab="month" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17M9 15l2 2 4-4"/></svg>เดือนนี้</button>
+  <button role="tab" data-tab="trend" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 18l5.5-6 4 3.5L20.5 6"/><path d="M15 6h5.5v5.5"/></svg>แนวโน้ม</button>
+  <button role="tab" data-tab="items" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></svg>รายการ</button>
+</div></nav>
+
+<div class="lock" id="lock" role="dialog" aria-modal="true" aria-label="ล็อกแอพ"></div>
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-hidden="true"></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* ===== ตั้งค่า ===== */
+const CONFIG = {
+  // ชื่อรายการที่เปลี่ยนชื่อข้ามปี → ชื่อเดียวกัน (ใช้เทียบแนวโน้ม)  "ชื่อเก่า": "ชื่อปัจจุบัน"
+  ALIASES: { 'ttb so smart (น้ำมันรถ)': 'ttb so smart (รถยนต์)' },
+  CLOSE_NOTE: 'เดือนที่ยังไม่ปิด'
+};
+const MTH = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+const MS = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const SERIES = ['var(--s1)','var(--s2)','var(--s3)','var(--s4)'];
+
+/* ===== state ===== */
+const $ = (s, r=document) => r.querySelector(s);
+const S = { data:null, years:[], map:{}, typeMap:{}, today:new Date(), tab:'month', y:null, m:null, by:'all',
+            through:null, off:new Set(), metric:'monthly', table:false, q:'', bk:null };
+const nf0 = new Intl.NumberFormat('en-US',{maximumFractionDigits:0});
+const nf2 = new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const f0 = n => '฿' + nf0.format(Math.round(n));
+const f2 = n => '฿' + nf2.format(n);
+const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const keyOf = n => { const k = String(n).trim().toLowerCase(); const a = Object.keys(CONFIG.ALIASES).find(x=>x.toLowerCase()===k); return a ? CONFIG.ALIASES[a].toLowerCase() : k; };
+
+/* ===== server (Apps Script API ผ่าน fetch) ===== */
+const store = {
+  get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} },
+  del(k){ try{ localStorage.removeItem(k); }catch(e){} }
+};
+/* --- ที่เก็บแบบเข้ารหัส (เมื่อเปิดล็อกแอพ): url/token/cache อยู่ในหน่วยความจำ และเก็บลงเครื่องเป็นข้อมูลเข้ารหัส --- */
+const SEC = { on: !!store.get('pr_lock'), key: null, mem: {} };
+const SEC_KEYS = ['pr_url','pr_token','pr_cache'];
+const secGet = k => SEC.on ? (SEC.mem[k] == null ? null : SEC.mem[k]) : store.get(k);
+const secSet = (k,v) => { if (!SEC.on) return store.set(k,v); SEC.mem[k]=v; persistSec(); };
+const secDel = k => { if (!SEC.on) return store.del(k); delete SEC.mem[k]; persistSec(); };
+let persistT; function persistSec(){ clearTimeout(persistT); persistT = setTimeout(async()=>{ if(SEC.key) store.set('pr_sec', JSON.stringify(await enc(SEC.key, JSON.stringify(SEC.mem)))); }, 50); }
+const cfg = () => { const url=secGet('pr_url'), token=secGet('pr_token'); return url && token ? {url,token} : null; };
+async function api(fn, ...args){
+  const c = cfg(); if (!c) throw new Error('NOSETUP');
+  let r;
+  try { r = await fetch(c.url, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({ fn, args, token:c.token }) }); }
+  catch(e){ throw new Error('OFFLINE'); }
+  let j; try { j = await r.json(); } catch(e){ throw new Error('ตอบกลับไม่ถูกต้อง — เช็กว่า Deploy เป็น "Anyone" และใช้ลิงก์ที่ลงท้าย /exec'); }
+  if (!j.ok) throw new Error(j.error || 'ผิดพลาด');
+  return j.data;
+}
+const errText = e => e.message==='OFFLINE' ? 'เชื่อมต่อไม่ได้ (ออฟไลน์?)' : e.message==='UNAUTHORIZED' ? 'token ไม่ถูกต้อง' : e.message;
+
+function ingest(data){
+  S.data = data; S.years = data.years.map(y=>y.year).sort((a,b)=>a-b); S.map = {}; S.typeMap = {};
+  data.years.forEach(Y => {
+    Y.items.forEach(it => { it.key = keyOf(it.name); });
+    S.map[Y.year] = Y;
+  });
+  // ประเภทของรายการ (Type) — ใช้ปีล่าสุดเป็นหลัก เติมให้ปีที่ไม่มีคอลัมน์ Type
+  [...S.years].forEach(y => S.map[y].items.forEach(it => { if (it.type) S.typeMap[it.key] = it.type; }));
+  S.years.forEach(y => S.map[y].items.forEach(it => { if (!it.type) it.type = S.typeMap[it.key] || 'Other'; }));
+  if (S.y == null) {
+    const ty = S.today.getFullYear();
+    S.y = S.map[ty] ? ty : S.years[S.years.length-1];
+    S.m = (S.y === ty) ? S.today.getMonth() : 11;
+  }
+}
+const latestY = () => S.years[S.years.length-1];
+const isCurrentY = y => y === S.today.getFullYear();
+
+/* ===== aggregation ===== */
+const payByList = () => { const s = new Set(); S.years.forEach(y=>S.map[y].items.forEach(i=>i.payBy && s.add(i.payBy))); return [...s]; };
+const pass = it => S.by === 'all' || it.payBy === S.by;
+const itemsOf = y => (S.map[y] ? S.map[y].items : []).filter(pass);
+function totals(y){
+  const out = Array(12).fill(null);
+  itemsOf(y).forEach(it => it.m.forEach((v,i)=>{ if (v) out[i] = (out[i]||0) + v; }));
+  return out;
+}
+const cum = arr => { if (arr[0]==null) return Array(12).fill(null); let t=0,last=-1; arr.forEach((v,i)=>{ if(v!=null) last=i; });
+  return arr.map((v,i)=> i>last ? null : (t += (v||0))); };
+const sumTo = (arr, m) => arr.slice(0,m+1).reduce((a,v)=>a+(v||0),0);
+const countTo = (arr, m) => arr.slice(0,m+1).filter(v=>v!=null).length;
+function defaultThrough(){
+  const ly = latestY(); const t = S.today;
+  if (isCurrentY(ly)) return Math.max(0, t.getMonth()-1);
+  return 11;
+}
+function delta(cur, prev, label){
+  if (prev == null || !prev) return '<span class="dl eq">–</span>';
+  const p = (cur-prev)/prev*100;
+  if (Math.abs(p) < .05) return '<span class="dl eq">เท่าเดิม</span>';
+  return `<span class="dl ${p>0?'up':'dn'}">${p>0?'▲':'▼'} ${Math.abs(p).toFixed(1)}%</span>`;
+}
+const bankOf = it => (it.bank && it.bank!=='-') ? it.bank : 'อื่นๆ (ไม่ผ่านธนาคาร)';
+const monthStat = (y, m) => {
+  const its = itemsOf(y).filter(i=>i.m[m]); if (!its.length) return null;
+  const sum = f => its.filter(f).reduce((a,i)=>a+i.m[m],0);
+  return { its, n: its.length, tot: sum(()=>true), paid: sum(i=>i.s[m]===1), fin: sum(i=>i.s[m]===2), draft: sum(i=>i.s[m]===0),
+           np: its.filter(i=>i.s[m]===1).length };
+};
+function bankSummary(y,m){
+  const o = {};
+  itemsOf(y).filter(i=>i.m[m]).forEach(it=>{ const k=bankOf(it); const r = o[k] || (o[k]={bank:k,tot:0,paid:0,fin:0,draft:0,n:0});
+    r.n++; r.tot+=it.m[m]; if(it.s[m]===1) r.paid+=it.m[m]; else if(it.s[m]===2) r.fin+=it.m[m]; else r.draft+=it.m[m]; });
+  return Object.values(o).sort((a,b)=>(b.tot-b.paid)-(a.tot-a.paid) || b.tot-a.tot);
+}
+
+/* ===== UI shell ===== */
+function renderPayBy(){
+  $('#payby').classList.remove('hide');
+  const list = ['all', ...payByList()];
+  $('#payby').innerHTML = list.map(v => `<button data-by="${esc(v)}" aria-pressed="${S.by===v}">${v==='all'?'ทั้งหมด':esc(v)}</button>`).join('');
+}
+function renderMonthbar(){
+  $('#monthbar').classList.toggle('hide', S.tab !== 'month');
+  if (S.tab !== 'month') return;
+  const i = S.years.indexOf(S.y);
+  $('#yrlabel').textContent = S.y + (isCurrentY(S.y) ? '' : '');
+  $('#yprev').disabled = i <= 0; $('#ynext').disabled = i >= S.years.length-1;
+  $('#yprev').style.opacity = i<=0?.3:1; $('#ynext').style.opacity = i>=S.years.length-1?.3:1;
+  $('#months').innerHTML = MS.map((n,k) => {
+    const st = monthStat(S.y,k); let dot = '';
+    if (st) dot = (isCurrentY(S.y) || S.y===latestY()) ? (st.np===st.n ? 'done' : 'part') : '';
+    return `<button class="mchip" data-m="${k}" aria-current="${S.m===k}"><span>${n}</span><i class="${dot}"></i></button>`;
+  }).join('');
+  const cur = $('#months .mchip[aria-current="true"]'); if (cur) cur.scrollIntoView({inline:'center',block:'nearest'});
+}
+function render(){
+  renderPayBy(); renderMonthbar();
+  document.querySelectorAll('nav.tabs button').forEach(b=>b.setAttribute('aria-selected', b.dataset.tab===S.tab));
+  const el = $('#main');
+  if (!S.data) return;
+  const hint = (!isStandalone() && !store.get('pr_hint')) ? `<div class="glass hintcard"><div style="flex:1">${isIOS()?'ปักไว้เป็นแอพ: แตะ <b>แชร์</b> แล้วเลือก <b>เพิ่มลงหน้าจอโฮม</b>':'ปักไว้เป็นแอพ: เปิดเมนูเบราว์เซอร์ แล้วเลือก <b>ติดตั้งแอพ</b> (หรือดูที่ ⚙ ตั้งค่า)'}</div><button id="hintx" aria-label="ปิดคำแนะนำ">✕</button></div>` : '';
+  el.innerHTML = hint + (S.tab==='month' ? viewMonth() : S.tab==='trend' ? viewTrend() : viewItems());
+  if (S.tab==='trend') drawTrend();
+  if (S.tab==='items') document.querySelectorAll('.irow .spark').forEach(drawSpark);
+}
+
+/* ===== VIEW: month ===== */
+function viewMonth(){
+  const y=S.y, m=S.m, st = monthStat(y,m), editable = isCurrentY(y) || y===latestY();
+  const prevY = S.map[y-1] ? totals(y-1)[m] : null;
+  const pm = m>0 ? totals(y)[m-1] : (S.map[y-1] ? totals(y-1)[11] : null);
+  const tot = st ? st.tot : 0, paid = st ? st.paid : 0, fin = st ? st.fin : 0, draft = st ? st.draft : 0, left = tot-paid;
+  const pp = tot ? paid/tot*100 : 0, pf = tot ? fin/tot*100 : 0;
+  let h = `<section class="glass hero" aria-label="สรุปเดือน">
+    <div class="lbl">ค่าใช้จ่าย ${MTH[m]} ${y}</div>
+    <div class="big">${tot?f2(tot):'฿0.00'}</div>`;
+  if (st && editable) h += `<div class="bar" role="progressbar" aria-valuenow="${Math.round(pp)}" aria-valuemin="0" aria-valuemax="100"><b class="p" style="width:${pp}%"></b><b class="f" style="width:${pf}%"></b></div>
+    <div class="prog"><span>จ่ายแล้ว <strong>${f2(paid)}</strong> (${st.np}/${st.n})</span><span>เหลือ <strong>${f2(left)}</strong></span></div>
+    <div class="legend" style="margin-top:8px"><span><i style="background:var(--accent)"></i>จ่ายแล้ว</span><span><i style="background:var(--fin)"></i>สรุปแล้ว ${f0(fin)}</span><span><i style="background:var(--t3)"></i>ยังสะสม ${f0(draft)}</span></div>`;
+  else if (!st) h += `<div class="prog"><span>ยังไม่มียอดในเดือนนี้</span></div>`;
+  h += `<div class="cmp">`;
+  if (prevY) h += `<span>เทียบ ${MS[m]} ${y-1} (${f0(prevY)}) ${delta(tot,prevY)}</span>`;
+  if (pm && m>0) h += `<span>เทียบ ${MS[m-1]} (${f0(pm)}) ${delta(tot,pm)}</span>`;
+  if (!prevY && !(pm&&m>0)) h += `<span>ยังไม่มีข้อมูลเทียบ</span>`;
+  h += `</div></section>`;
+
+  // สรุปต้องจ่ายแต่ละธนาคาร
+  if (st && editable) {
+    const bs = bankSummary(y,m), due = bs.reduce((a,b)=>a+b.tot-b.paid,0);
+    h += `<section class="glass banks" aria-label="ต้องจ่ายแต่ละธนาคาร"><h2>ต้องจ่ายแต่ละธนาคาร</h2><div class="sub">แตะธนาคารเพื่อกรองรายการด้านล่าง</div>` +
+      bs.map(b=>{ const d=b.tot-b.paid, ok = d<0.005;
+        return `<button class="brow ${ok?'ok':''}" data-bank="${esc(b.bank)}" aria-pressed="${S.bk===b.bank}">
+          <div class="bn"><b>${esc(b.bank)}</b><small>${b.n} รายการ${b.paid?` · จ่ายแล้ว ${f0(b.paid)}`:''}</small></div>
+          <div class="bd">${ok?'<b>จ่ายครบแล้ว ✓</b>':`<b>${f2(d)}</b><small>${b.fin?`สรุปแล้ว ${f0(b.fin)}`:''}${b.fin&&b.draft?' · ':''}${b.draft?`ยังสะสม ${f0(b.draft)}`:''}</small>`}</div></button>`; }).join('') +
+      `<div class="btot"><span>รวมที่ต้องจ่าย</span><span>${f2(due)}</span></div></section>`;
+  }
+
+  const its = itemsOf(y).filter(i=>!S.bk || bankOf(i)===S.bk);
+  const withAmt = its.filter(i=>i.m[m]).sort((a,b)=> b.m[m]-a.m[m]);
+  const finl = withAmt.filter(i=>i.s[m]===2), draftl = withAmt.filter(i=>i.s[m]===0), done = withAmt.filter(i=>i.s[m]===1);
+  const none = its.filter(i=>!i.m[m]);
+  const unpaidAll = itemsOf(y).filter(i=>i.m[m] && i.s[m]!==1);
+  if (S.bk) h += `<div class="fbar"><span>กรอง: <strong style="color:var(--text)">${esc(S.bk)}</strong></span><button class="pill" data-bank="${esc(S.bk)}">ล้างตัวกรอง ✕</button></div>`;
+  if (editable) {
+    h += `<div class="actions">`;
+    if (unpaidAll.length) h += `<button class="btn primary" id="payall">✓ จ่ายครบทั้งเดือน (${unpaidAll.length})</button>`;
+    else if (st) h += `<button class="btn ghost" id="undoall" style="flex:1">ปิดครบแล้ว · ยกเลิกทั้งหมด</button>`;
+    h += `<button class="btn ghost" id="additem" ${unpaidAll.length?'':'style="flex:0 0 auto"'}>＋ เพิ่มรายการ</button></div>`;
+  }
+  if (finl.length) h += `<div class="sect">สรุปแล้ว · รอจ่าย <span>${finl.length} รายการ · ${f2(finl.reduce((a,i)=>a+i.m[m],0))}</span></div><div class="glass list">${finl.map(i=>rowHTML(i,m,editable)).join('')}</div>`;
+  if (draftl.length) h += `<div class="sect">ยังสะสมยอด <span>${draftl.length} รายการ · ${f2(draftl.reduce((a,i)=>a+i.m[m],0))}</span></div>${editable?'<div class="hint2">กดค้างที่วงกลม = สรุปยอด (สีส้ม) · แตะวงกลม = จ่ายแล้ว</div>':''}<div class="glass list">${draftl.map(i=>rowHTML(i,m,editable)).join('')}</div>`;
+  if (done.length) h += `<div class="sect">จ่ายแล้ว <span>${done.length} รายการ</span></div><div class="glass list">${done.map(i=>rowHTML(i,m,editable)).join('')}</div>`;
+  if (!withAmt.length) h += `<div class="glass list" style="margin-top:14px"><div class="empty">${S.bk?'ไม่มียอดของธนาคารนี้ในเดือนนี้':'ยังไม่มียอดในเดือนนี้<br>แตะรายการด้านล่างเพื่อใส่ยอดแรก'}</div></div>`;
+  if (none.length) h += `<details class="glass list none" style="margin-top:14px"><summary><span>รายการที่ไม่มียอดเดือนนี้ (${none.length})</span><span>แตะเพื่อใส่ยอด</span></summary>${none.map(i=>rowHTML(i,m,editable)).join('')}</details>`;
+  return h;
+}
+function rowHTML(it, m, editable){
+  const s = it.s[m], v = it.m[m];
+  const py = S.map[S.y-1] ? S.map[S.y-1].items.find(x=>x.key===it.key) : null;
+  const pv = py ? py.m[m] : null;
+  const cls = 'row' + (s===1?' paid':'') + (s===2?' fin':'');
+  const lab = s===1?'ยกเลิกจ่ายแล้ว':'ทำเครื่องหมายจ่ายแล้ว';
+  const chk = editable ? `<button class="chk ${s===2?'fin':''}" data-row="${it.row}" aria-pressed="${s===1}" aria-label="${lab}: ${esc(it.name)}"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span></button>` : '<span style="width:12px"></span>';
+  return `<div class="${cls}" data-row="${it.row}">${chk}
+    <div class="rbody" data-edit="${it.row}"><div class="rname">${esc(it.name)}</div><div class="rsub">${esc([it.bank&&it.bank!=='-'?it.bank:'',it.type,it.payBy].filter(Boolean).join(' · '))}</div></div>
+    <div class="ramt" data-edit="${it.row}"><b>${v?f2(v):'–'}</b><small>${pv?'ปีก่อน '+f0(pv):(py?'ปีก่อน –':'')}</small></div></div>`;
+}
+
+/* ===== VIEW: trend ===== */
+function viewTrend(){
+  const ys = S.years, L = latestY(), P = L-1;
+  if (S.through==null) S.through = defaultThrough();
+  const t = S.through;
+  const tl = totals(L), tp = S.map[P] ? totals(P) : null;
+  const ytdL = sumTo(tl,t), ytdP = tp ? sumTo(tp,t) : null;
+  const cl = countTo(tl,t), cp = tp ? countTo(tp,t) : 0;
+  const avgL = cl ? ytdL/cl : 0, avgP = cp ? ytdP/cp : null;
+  const idxs = tl.map((v,i)=>({v,i})).filter(o=>o.v!=null);
+  const hi = idxs.length ? idxs.reduce((a,b)=>b.v>a.v?b:a) : null, lo = idxs.length ? idxs.reduce((a,b)=>b.v<a.v?b:a) : null;
+  const opts = MS.map((n,i)=>`<option value="${i}" ${i===t?'selected':''}>${n}</option>`).join('');
+  let h = `<div class="actions" style="align-items:center;margin-top:14px"><label for="thr" style="font-size:13px;color:var(--t2)">เทียบ ม.ค. – </label>
+    <select id="thr" class="select">${opts}</select><span style="font-size:12px;color:var(--t3)">${L} กับ ${P}</span></div>
+  <div class="kpis">
+    <div class="glass kpi"><div class="k">รวมสะสม ถึง ${MS[t]}</div><div class="v">${f0(ytdL)}</div><div class="d">${tp?`${P}: ${f0(ytdP)} ${delta(ytdL,ytdP)}`:'ไม่มีข้อมูลปีก่อน'}</div></div>
+    <div class="glass kpi"><div class="k">เฉลี่ยต่อเดือน</div><div class="v">${f0(avgL)}</div><div class="d">${avgP?`${P}: ${f0(avgP)} ${delta(avgL,avgP)}`:'–'}</div></div>
+    <div class="glass kpi"><div class="k">เดือนสูงสุด ${L}</div><div class="v">${hi?f0(hi.v):'–'}</div><div class="d">${hi?MTH[hi.i]:''}</div></div>
+    <div class="glass kpi"><div class="k">เดือนต่ำสุด ${L}</div><div class="v">${lo?f0(lo.v):'–'}</div><div class="d">${lo?MTH[lo.i]:''}</div></div>
+  </div>`;
+  // chart card
+  const chips = [...ys].reverse().map((y,k)=>`<button class="chip" data-yr="${y}" aria-pressed="${!S.off.has(y)}"><i style="background:${colorOf(y)}"></i>${y}</button>`).join('');
+  h += `<section class="glass card"><h2>เทียบรายเดือนข้ามปี</h2><div class="sub">แตะ/ลากบนกราฟเพื่อดูยอดแต่ละเดือน</div>
+    <div class="seg" style="margin:0 0 10px"><button data-metric="monthly" aria-pressed="${S.metric==='monthly'}">รายเดือน</button><button data-metric="cum" aria-pressed="${S.metric==='cum'}">สะสม</button><button data-table="1" aria-pressed="${S.table}">ตาราง</button></div>
+    <div class="chips">${chips}</div>
+    <div class="${S.table?'hide':''}"><div class="chartbox" id="chart"></div></div>
+    <div class="${S.table?'':'hide'}" id="tbl"></div>
+    <div class="note" id="chartnote"></div></section>`;
+  // categories
+  h += `<section class="glass card"><h2>ตามประเภท</h2><div class="sub">เทียบ ม.ค. – ${MS[t]} ${L} กับ ${P}</div>${catHTML(L,P,t)}</section>`;
+  // year table
+  h += `<section class="glass card"><h2>สรุปรายปี</h2><div class="sub">&nbsp;</div><table class="t"><thead><tr><th>ปี</th><th>รวม</th><th>เฉลี่ย/เดือน</th><th>เดือน</th></tr></thead><tbody>${
+    [...ys].reverse().map(y=>{ const a=totals(y), n=countTo(a,11), s=sumTo(a,11);
+      return `<tr><td>${y}${n<12?'<span class="badge">บางส่วน</span>':''}</td><td>${f0(s)}</td><td>${n?f0(s/n):'–'}</td><td>${n}/12</td></tr>`; }).join('')
+  }</tbody></table><div class="note">ปีที่มีข้อมูลไม่ครบ 12 เดือน (เช่น ปีที่เพิ่งเริ่มจดหรือปีปัจจุบัน) ไม่ควรเทียบยอดรวมทั้งปีตรง ๆ — ใช้ตัวเลือก "เทียบ ม.ค. – …" ด้านบนแทน</div></section>`;
+  return h;
+}
+function colorOf(y){ const i = S.years.length-1 - S.years.indexOf(y); return SERIES[Math.min(i,SERIES.length-1)]; }
+function catHTML(L,P,t){
+  const agg = y => { const o={}; itemsOf(y).forEach(it=>{ const v=sumTo(it.m,t); if(v) o[it.type||'Other']=(o[it.type||'Other']||0)+v; }); return o; };
+  const a = agg(L), b = S.map[P] ? agg(P) : {};
+  const cats = [...new Set([...Object.keys(a),...Object.keys(b)])].sort((x,y)=>(a[y]||0)-(a[x]||0) || (b[y]||0)-(b[x]||0));
+  if (!cats.length) return '<div class="empty">ยังไม่มีข้อมูล</div>';
+  const max = Math.max(...cats.map(c=>Math.max(a[c]||0,b[c]||0)));
+  return cats.map(c=>`<div class="catrow"><div class="h"><span>${esc(c)}</span><span>${delta(a[c]||0,b[c]||0)}</span></div>
+    <div class="cbar"><u>${L}</u><div class="trk"><b style="width:${(a[c]||0)/max*100}%;background:${colorOf(L)}"></b></div><em>${f0(a[c]||0)}</em></div>
+    ${S.map[P]?`<div class="cbar"><u>${P}</u><div class="trk"><b style="width:${(b[c]||0)/max*100}%;background:${colorOf(P)}"></b></div><em>${f0(b[c]||0)}</em></div>`:''}</div>`).join('');
+}
+function drawTrend(){
+  const ys = S.years.filter(y=>!S.off.has(y));
+  const series = []; const dropped = [];
+  [...ys].forEach(y=>{
+    const raw = totals(y); const vals = S.metric==='cum' ? cum(raw) : raw;
+    if (S.metric==='cum' && raw[0]==null && raw.some(v=>v!=null)) { dropped.push(y); return; }
+    if (vals.some(v=>v!=null)) series.push({ name:String(y), color:colorOf(y), vals, hollow: isCurrentY(y) ? S.today.getMonth() : -1, w: y===latestY()?2.6:2 });
+  });
+  series.sort((a,b)=>b.name-a.name); series.reverse();
+  lineChart($('#chart'), series);
+  $('#chartnote').textContent = (dropped.length ? `ไม่แสดง ${dropped.join(', ')} ในโหมดสะสม เพราะไม่มีข้อมูลตั้งแต่เดือนมกราคม. ` : '') + (series.some(s=>s.hollow>=0) ? 'จุดโปร่ง = เดือนปัจจุบัน ยังไม่ครบเดือน' : '');
+  // table
+  const head = `<tr><th>เดือน</th>${[...series].reverse().map(s=>`<th>${s.name}</th>`).join('')}</tr>`;
+  const body = MS.map((n,i)=>`<tr><td>${n}</td>${[...series].reverse().map(s=>`<td>${s.vals[i]!=null?nf0.format(Math.round(s.vals[i])):'–'}</td>`).join('')}</tr>`).join('');
+  $('#tbl').innerHTML = `<table class="t"><thead>${head}</thead><tbody>${body}</tbody></table>`;
+}
+
+/* ===== chart: lines ===== */
+function niceMax(v){ if(!v||v<=0) return 4; const raw=v/4, p=Math.pow(10,Math.floor(Math.log10(raw))); const step=[1,2,2.5,5,10].map(k=>k*p).find(s=>s>=raw); return step*4; }
+const shortN = n => n>=1e6 ? (n/1e6).toFixed(n%1e6?1:0)+'M' : n>=1000 ? (n/1000)+'k' : String(n);
+function lineChart(box, series){
+  const W = Math.max(280, box.clientWidth||340), H = 230, ml=40, mr=10, mt=12, mb=26;
+  const pw = W-ml-mr, ph = H-mt-mb;
+  const max = niceMax(Math.max(0, ...series.flatMap(s=>s.vals.filter(v=>v!=null))));
+  const X = i => ml + pw*(i/11), Y = v => mt + ph*(1 - v/max);
+  let g = '';
+  for (let k=0;k<=4;k++){ const v = max*k/4, y = Y(v);
+    g += `<line x1="${ml}" x2="${W-mr}" y1="${y}" y2="${y}" stroke="${k?'var(--grid)':'var(--axis)'}" stroke-width="1"/><text x="${ml-6}" y="${y+4}" text-anchor="end" font-size="11" fill="var(--t2)">${shortN(v)}</text>`; }
+  MS.forEach((n,i)=>{ if (i%1===0) g += `<text x="${X(i)}" y="${H-8}" text-anchor="middle" font-size="${W<340?9:10.5}" fill="var(--t2)">${W<340 ? n.replace('.','').slice(0,3) : n}</text>`; });
+  let lines = '', dots = '';
+  series.forEach(s=>{
+    let d=''; let pen=false;
+    s.vals.forEach((v,i)=>{ if(v==null){pen=false;return;} d += (pen?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1)+' '; pen=true; });
+    lines += `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="${s.w}" stroke-linecap="round" stroke-linejoin="round"/>`;
+    s.vals.forEach((v,i)=>{ if(v==null) return; const hol = i===s.hollow;
+      dots += `<circle cx="${X(i)}" cy="${Y(v)}" r="${hol?4.5:3.5}" fill="${hol?'var(--glass-solid)':s.color}" stroke="${hol?s.color:'var(--glass-solid)'}" stroke-width="${hol?2:1.5}"/>`; });
+  });
+  box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="กราฟเส้นเทียบรายเดือนข้ามปี">${g}${lines}${dots}<line id="xh" x1="0" x2="0" y1="${mt}" y2="${mt+ph}" stroke="var(--t3)" stroke-width="1" opacity="0"/><g id="hl"></g><rect id="hit" x="${ml-8}" y="0" width="${pw+16}" height="${H}" fill="transparent"/></svg><div class="tip" id="tip"></div>`;
+  const svg = box.querySelector('svg'), tip = box.querySelector('#tip'), xh = box.querySelector('#xh'), hl = box.querySelector('#hl');
+  const show = ev => {
+    const r = svg.getBoundingClientRect(); const px = (ev.clientX - r.left) * (W/r.width);
+    const i = Math.max(0, Math.min(11, Math.round((px-ml)/pw*11)));
+    xh.setAttribute('x1',X(i)); xh.setAttribute('x2',X(i)); xh.setAttribute('opacity',1);
+    hl.innerHTML = series.filter(s=>s.vals[i]!=null).map(s=>`<circle cx="${X(i)}" cy="${Y(s.vals[i])}" r="6" fill="${s.color}" stroke="var(--glass-solid)" stroke-width="2"/>`).join('');
+    tip.innerHTML = `<b>${MTH[i]}</b>` + [...series].reverse().map(s=>`<div><span><i style="background:${s.color}"></i>${s.name}</span><strong>${s.vals[i]!=null?f0(s.vals[i]):'–'}</strong></div>`).join('');
+    const sc = r.width/W, tw = 150, left = Math.min(Math.max(0, X(i)*sc - tw/2), r.width - tw);
+    tip.style.left = left+'px'; tip.style.opacity = 1;
+  };
+  const hide = () => { xh.setAttribute('opacity',0); hl.innerHTML=''; tip.style.opacity=0; };
+  const hit = box.querySelector('#hit');
+  hit.addEventListener('pointerdown', show); hit.addEventListener('pointermove', e=>{ if(e.pointerType!=='mouse' || e.buttons || true) show(e); });
+  hit.addEventListener('pointerleave', e=>{ if(e.pointerType==='mouse') hide(); });
+  document.addEventListener('pointerdown', e=>{ if(!box.contains(e.target)) hide(); }, {once:true});
+}
+function drawSpark(el){
+  const a = JSON.parse(el.dataset.a), b = JSON.parse(el.dataset.b||'[]'), W=64,H=26;
+  const all = [...a,...b].filter(v=>v!=null); const mx = Math.max(1,...all);
+  const pth = arr => { let d='',pen=false; arr.forEach((v,i)=>{ if(v==null){pen=false;return;} d+=(pen?'L':'M')+(2+i*(W-4)/11).toFixed(1)+' '+(H-3-(v/mx)*(H-6)).toFixed(1)+' '; pen=true;}); return d; };
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true">${b.length?`<path d="${pth(b)}" fill="none" stroke="var(--s2)" stroke-width="1.5" opacity=".7" stroke-linecap="round"/>`:''}<path d="${pth(a)}" fill="none" stroke="var(--s1)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
+/* ===== VIEW: items ===== */
+function itemRows(){
+  const L = latestY(), P = L-1; if (S.through==null) S.through = defaultThrough(); const t = S.through;
+  const rows = itemsOf(L).map(it=>{ const py = S.map[P] ? S.map[P].items.find(x=>x.key===it.key) : null;
+    return { it, py, cur:sumTo(it.m,t), prev: py?sumTo(py.m,t):null }; });
+  return rows.filter(r=>r.cur||r.prev).sort((a,b)=>b.cur-a.cur);
+}
+function viewItems(){
+  const L = latestY(), P = L-1, t = S.through ?? (S.through=defaultThrough());
+  const q = S.q.trim().toLowerCase();
+  const rows = itemRows().filter(r=>!q || r.it.name.toLowerCase().includes(q));
+  let h = `<div style="margin-top:14px"><input class="search" id="q" type="search" placeholder="ค้นหารายการ" value="${esc(S.q)}" aria-label="ค้นหารายการ"><div class="note" style="margin:4px 4px 0">รวม ม.ค. – ${MS[t]} ${L} เทียบกับ ${P} · เรียงตามยอดมากไปน้อย</div></div>`;
+  h += `<div class="glass list" style="margin-top:12px">` + (rows.length ? rows.map(r=>`<button class="row irow" data-item="${esc(r.it.key)}" style="width:100%">
+    <div class="rbody" style="padding-left:6px"><div class="rname">${esc(r.it.name)}</div><div class="rsub">${esc([r.it.type,r.it.payBy].filter(Boolean).join(' · '))}</div></div>
+    <div class="spark" data-a='${JSON.stringify(r.it.m)}' data-b='${JSON.stringify(r.py?r.py.m:[])}'></div>
+    <div class="ramt"><b>${f0(r.cur)}</b><small>${r.prev!=null?`${P}: ${f0(r.prev)} ${delta(r.cur,r.prev)}`:'—'}</small></div></button>`).join('') : '<div class="empty">ไม่พบรายการ</div>') + `</div>`;
+  return h;
+}
+function openItem(key){
+  const series = []; let name='', meta='';
+  S.years.forEach(y=>{ const it = S.map[y].items.find(i=>i.key===key); if(!it) return; if(y===latestY()){name=it.name; meta=[it.bank&&it.bank!=='-'?it.bank:'',it.type,it.payBy].filter(Boolean).join(' · ');} else if(!name){name=it.name;}
+    series.push({name:String(y), color:colorOf(y), vals:it.m.map(v=>v||null), hollow:-1, w:y===latestY()?2.6:2}); });
+  const sum = series.map(s=>({n:s.name,t:s.vals.reduce((a,v)=>a+(v||0),0),c:s.vals.filter(v=>v).length}));
+  openSheet(`<div class="grab"></div><h3>${esc(name)}</h3><div class="sub">${esc(meta)}</div>
+    <div class="chartbox" id="ichart"></div>
+    <table class="t" style="margin-top:12px"><thead><tr><th>ปี</th><th>รวม</th><th>เฉลี่ย/เดือนที่มียอด</th></tr></thead><tbody>${[...sum].reverse().map(s=>`<tr><td>${s.n}</td><td>${f0(s.t)}</td><td>${s.c?f0(s.t/s.c):'–'}</td></tr>`).join('')}</tbody></table>
+    <div class="actions" style="margin-top:16px"><button class="btn ghost" style="flex:1" data-close>ปิด</button></div>`);
+  lineChart($('#ichart'), series);
+}
+
+/* ===== sheet / toast ===== */
+let lastFocus=null;
+function openSheet(html){ lastFocus=document.activeElement; const s=$('#sheet'); s.innerHTML=html; s.classList.add('on'); s.setAttribute('aria-hidden','false'); $('#scrim').classList.add('on'); }
+function closeSheet(){ $('#sheet').classList.remove('on'); $('#sheet').setAttribute('aria-hidden','true'); $('#scrim').classList.remove('on'); if(lastFocus&&lastFocus.focus) try{lastFocus.focus()}catch(e){} }
+let tt=null;
+function toast(msg, undo){
+  const t=$('#toast'); t.innerHTML = `<span>${esc(msg)}</span>` + (undo?'<button id="undo">เลิกทำ</button>':''); t.classList.add('on');
+  if (undo) $('#undo').onclick = () => { t.classList.remove('on'); undo(); };
+  clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('on'), undo?6000:3200);
+}
+const getItem = (y,row) => S.map[y].items.find(i=>i.row===row);
+const apply = (it,m,r) => { it.m[m]=r.v; it.f[m]=r.f; it.s[m]=r.s; };
+const STN = {0:'กำลังสะสม',2:'สรุปยอดแล้ว',1:'จ่ายแล้ว'};
+
+async function changeStatus(row, next, quiet){
+  const y=S.y,m=S.m,it=getItem(y,row); if(!it) return; const prev=it.s[m]; if(prev===next) return;
+  it.s[m]=next; render();
+  try { const r = await api('setStatus',y,row,m,next); apply(it,m,r); render();
+    toast(`${STN[next]}: ${it.name}`, quiet?null:()=>changeStatus(row,prev,true)); }
+  catch(e){ it.s[m]=prev; render(); toast('บันทึกไม่สำเร็จ: '+errText(e)); }
+}
+const togglePaid = row => { const it=getItem(S.y,row); if(it) changeStatus(row, it.s[S.m]===1 ? 2 : 1); };
+const toggleFinal = row => { const it=getItem(S.y,row); if(!it) return; const s=it.s[S.m]; changeStatus(row, s===0 ? 2 : s===2 ? 0 : 2); };
+
+function confirmAll(paid){
+  const y=S.y,m=S.m; const its = itemsOf(y).filter(i=>i.m[m] && (paid ? i.s[m]!==1 : i.s[m]===1));
+  const sum = its.reduce((a,i)=>a+i.m[m],0);
+  openSheet(`<div class="grab"></div><h3>${paid?'จ่ายครบทั้งเดือน':'ยกเลิกสถานะจ่ายแล้ว'}</h3>
+    <div class="sub">${paid?'เปลี่ยนสีตัวเลขเป็นสีน้ำเงิน':'เปลี่ยนสีตัวเลขกลับเป็นสีส้ม (สรุปยอดแล้ว)'} ${its.length} รายการ รวม ${f2(sum)} ของเดือน${MTH[m]} ${y}${S.bk?'<br>(ทั้งเดือน ไม่เฉพาะธนาคารที่กรองไว้)':''}</div>
+    <div class="actions"><button class="btn ghost" data-close>ยกเลิก</button><button class="btn primary" id="go">${paid?'ยืนยันจ่ายแล้ว':'ยืนยัน'}</button></div>`);
+  $('#go').onclick = async () => {
+    const rows = its.map(i=>i.row), old = Object.fromEntries(its.map(i=>[i.row,i.s[m]])), next = paid?1:2;
+    $('#go').disabled = true; $('#go').textContent='กำลังบันทึก…';
+    try { const res = await api('setStatusMany',y,m,rows,next); res.forEach(r=>{ getItem(y,r.row).s[m]=r.s; }); closeSheet(); render();
+      toast(paid?`ปิดเดือน${MTH[m]}แล้ว (${rows.length} รายการ)`:`ยกเลิกแล้ว ${rows.length} รายการ`, async()=>{
+        try{ for (const st of [0,1,2]) { const g = rows.filter(r=>old[r]===st); if(g.length) (await api('setStatusMany',y,m,g,st)).forEach(r=>getItem(y,r.row).s[m]=r.s); } render(); }
+        catch(e){ toast('เลิกทำไม่สำเร็จ: '+errText(e)); } });
+    } catch(e){ closeSheet(); toast('บันทึกไม่สำเร็จ: '+errText(e)); }
+  };
+}
+
+function openEdit(row){
+  const y=S.y,m=S.m,it=getItem(y,row); if(!it) return; const editable = isCurrentY(y)||y===latestY();
+  const py = S.map[y-1] ? S.map[y-1].items.find(x=>x.key===it.key) : null;
+  const pm = m>0 ? it.m[m-1] : (S.map[y-1]&&py ? py.m[11] : null);
+  const cur = () => it.f[m] || (it.m[m]==null?'':String(it.m[m]));
+  openSheet(`<div class="grab"></div><h3>${esc(it.name)}</h3><div class="sub">${MTH[m]} ${y}${it.payBy?' · '+esc(it.payBy):''}${it.bank&&it.bank!=='-'?' · '+esc(it.bank):''}</div>
+   <div class="field"><label for="amt">ยอดรวมเดือนนี้ (บาท)</label>
+     <input class="inp" id="amt" value="${esc(cur())}" inputmode="${it.f[m]?'text':'decimal'}" enterkeyhint="done" autocomplete="off" placeholder="0.00">
+     ${it.f[m]?`<div class="hint">ช่องนี้เป็นสูตรในชีท แก้ไขได้ (ขึ้นต้นด้วย =)</div>`:''}</div>
+   ${editable?`<div class="field"><label>สถานะ</label><div class="seg" style="margin:0" role="group"><button data-st="0" aria-pressed="${it.s[m]===0}">กำลังสะสม</button><button data-st="2" aria-pressed="${it.s[m]===2}">สรุปแล้ว</button><button data-st="1" aria-pressed="${it.s[m]===1}">จ่ายแล้ว</button></div></div>`:''}
+   <details class="adv"><summary>เพิ่ม/ลดจากยอดเดิม</summary>
+     <div class="two"><input class="inp" id="add" inputmode="decimal" placeholder="เช่น 350" autocomplete="off"><button class="btn ghost" id="plus" style="flex:0 0 64px" aria-label="เพิ่มยอด">+</button><button class="btn ghost" id="minus" style="flex:0 0 64px" aria-label="ลดยอด">−</button></div>
+     <div class="hint">ต่อท้ายสูตรเดิมในชีท เช่น =5940+600 → =5940+600+350</div></details>
+   <div class="refs"><div>เดือนก่อน<b>${pm?f2(pm):'–'}</b></div><div>${MS[m]} ${y-1}<b>${py&&py.m[m]?f2(py.m[m]):'–'}</b></div></div>
+   <div class="actions" style="margin-top:16px"><button class="btn ghost" data-close>ปิด</button><button class="btn primary" id="save">บันทึกยอด</button></div>`);
+  const sync = () => { $('#amt').value = cur(); $('#sheet').querySelectorAll('[data-st]').forEach(b=>b.setAttribute('aria-pressed', String(+b.dataset.st===it.s[m]))); render(); };
+  const run = async (btn, fn, okMsg, close) => { btn.disabled=true; try{ const r = await fn(); if(r) apply(it,m,r); if(close) closeSheet(); else sync(); render(); toast(okMsg); }catch(e){ toast(errText(e)); } btn.disabled=false; };
+  const save = e => { const v = $('#amt').value.trim(); if (v === cur()) { closeSheet(); return; }
+    run($('#save'), ()=>api('setAmount',y,row,m,v), `บันทึกยอด ${it.name} แล้ว`, true); };
+  $('#save').onclick = save;
+  $('#amt').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); save(); } });
+  const add = sign => e => { const v = parseFloat(($('#add').value||'').replace(/,/g,'')); if(!v){ toast('ใส่จำนวนที่จะ'+(sign>0?'เพิ่ม':'ลด')); return; }
+    run(e.currentTarget, async()=>{ const r = await api('addAmount',y,row,m,sign*v); $('#add').value=''; return r; }, (sign>0?'เพิ่ม ':'ลด ')+f2(v)+' แล้ว'); };
+  $('#plus').onclick = add(1); $('#minus').onclick = add(-1);
+  $('#sheet').querySelectorAll('[data-st]').forEach(b=>b.onclick = () => { const want=+b.dataset.st; if (it.s[m]===want) return; run(b, ()=>api('setStatus',y,row,m,want), STN[want]); });
+  setTimeout(()=>{ const a=$('#amt'); if(a && $('#sheet').classList.contains('on')){ a.focus(); a.select(); } }, 380);
+}
+
+function openAdd(){
+  const y=S.y, m=S.m, its = S.map[y].items;
+  const uniq = f => [...new Set(its.map(f).filter(v=>v && v!=='-'))];
+  const banks = uniq(i=>i.bank), types = uniq(i=>i.type), pays = payByList();
+  let payBy = pays.includes('Gun') ? 'Gun' : (pays[0]||'');
+  openSheet(`<div class="grab"></div><h3>เพิ่มรายการใหม่</h3><div class="sub">เพิ่มแถวใหม่ในชีทปี ${y}</div>
+   <div class="field"><label for="n_name">ชื่อรายการ (Pay to)</label><input class="inp" id="n_name" style="font-size:17px" autocomplete="off" placeholder="เช่น ค่าประกันรถ"></div>
+   <div class="field"><label for="n_bank">ธนาคาร (Bank)</label><input class="inp" id="n_bank" style="font-size:17px" list="dl_bank" autocomplete="off" placeholder="เลือกหรือพิมพ์ใหม่ ถ้าไม่มีใส่ -"><datalist id="dl_bank">${banks.map(b=>`<option value="${esc(b)}">`).join('')}<option value="-"></datalist></div>
+   <div class="field"><label for="n_type">ประเภท (Type)</label><input class="inp" id="n_type" style="font-size:17px" list="dl_type" autocomplete="off" placeholder="เลือกหรือพิมพ์ใหม่"><datalist id="dl_type">${types.map(b=>`<option value="${esc(b)}">`).join('')}</datalist></div>
+   <div class="field"><label>ผู้จ่าย (Pay by)</label><div class="chips" id="n_pay">${pays.map(p=>`<button class="pill" data-p="${esc(p)}" aria-pressed="${p===payBy}">${esc(p)}</button>`).join('')}</div></div>
+   <div class="field"><label for="n_amt">ยอด${MTH[m]} (ไม่บังคับ)</label><input class="inp" id="n_amt" inputmode="decimal" autocomplete="off" placeholder="0.00"></div>
+   <div class="err" id="n_err" role="alert"></div>
+   <div class="actions"><button class="btn ghost" data-close>ยกเลิก</button><button class="btn primary" id="n_save">เพิ่มรายการ</button></div>`);
+  $('#n_pay').onclick = e => { const b=e.target.closest('[data-p]'); if(!b) return; payBy=b.dataset.p; $('#n_pay').querySelectorAll('[data-p]').forEach(x=>x.setAttribute('aria-pressed',String(x===b))); };
+  $('#n_save').onclick = async e => {
+    const name=$('#n_name').value.trim(); if(!name){ $('#n_err').textContent='ใส่ชื่อรายการก่อน'; $('#n_name').focus(); return; }
+    const btn=e.currentTarget; btn.disabled=true; btn.textContent='กำลังเพิ่ม…'; $('#n_err').textContent='';
+    try {
+      const it = await api('addItem', y, { name, bank:$('#n_bank').value.trim()||'-', type:$('#n_type').value.trim()||'Other', payBy, month:m, amount:$('#n_amt').value });
+      it.key = keyOf(it.name); if (!it.type) it.type = S.typeMap[it.key] || 'Other'; S.map[y].items.push(it);
+      closeSheet(); render(); toast(`เพิ่ม "${it.name}" แล้ว`);
+    } catch(err){ $('#n_err').textContent = errText(err); btn.disabled=false; btn.textContent='เพิ่มรายการ'; }
+  };
+}
+
+/* ===== events ===== */
+document.addEventListener('click', e => {
+  const t = e.target;
+  const by = t.closest('[data-by]'); if (by){ S.by = by.dataset.by; return render(); }
+  const mc = t.closest('.mchip'); if (mc){ S.m = +mc.dataset.m; return render(); }
+  const tab = t.closest('nav.tabs button'); if (tab){ S.tab = tab.dataset.tab; window.scrollTo({top:0}); return render(); }
+  const chk = t.closest('.chk'); if (chk){ if (lpFired){ lpFired=false; return; } return togglePaid(+chk.dataset.row); }
+  const bk = t.closest('[data-bank]'); if (bk){ S.bk = (S.bk===bk.dataset.bank) ? null : bk.dataset.bank; return render(); }
+  if (t.closest('#additem')) return openAdd();
+  const ed = t.closest('[data-edit]'); if (ed){ return openEdit(+ed.dataset.edit); }
+  const it = t.closest('[data-item]'); if (it){ return openItem(it.dataset.item); }
+  const yr = t.closest('[data-yr]'); if (yr){ const y=+yr.dataset.yr; S.off.has(y)?S.off.delete(y):S.off.add(y); return render(); }
+  const mt = t.closest('[data-metric]'); if (mt){ S.metric = mt.dataset.metric; S.table=false; return render(); }
+  if (t.closest('[data-table]')){ S.table=!S.table; return render(); }
+  if (t.closest('#payall')) return confirmAll(true);
+  if (t.closest('#undoall')) return confirmAll(false);
+  if (t.closest('[data-close]') || t.id==='scrim') return closeSheet();
+  if (t.closest('#yprev')){ const i=S.years.indexOf(S.y); if(i>0){ S.y=S.years[i-1]; } return render(); }
+  if (t.closest('#ynext')){ const i=S.years.indexOf(S.y); if(i<S.years.length-1){ S.y=S.years[i+1]; } return render(); }
+  if (t.closest('#refresh')) return load(true);
+});
+let lpT=null, lpFired=false;
+document.addEventListener('pointerdown', e => { const c=e.target.closest('.chk'); if(!c) return; lpFired=false; clearTimeout(lpT);
+  lpT=setTimeout(()=>{ lpFired=true; if(navigator.vibrate) try{navigator.vibrate(15)}catch(_){} toggleFinal(+c.dataset.row); }, 500); });
+['pointerup','pointercancel','scroll'].forEach(ev=>document.addEventListener(ev, ()=>clearTimeout(lpT), true));
+document.addEventListener('contextmenu', e => { if (e.target.closest('.chk')) e.preventDefault(); });
+document.addEventListener('change', e => { if (e.target.id==='thr'){ S.through = +e.target.value; render(); } });
+document.addEventListener('input', e => { if (e.target.id==='q'){ S.q = e.target.value; const pos=e.target.selectionStart; render(); const q=$('#q'); q.focus(); q.setSelectionRange(pos,pos); } });
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeSheet(); });
+let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz=setTimeout(()=>{ if(S.tab==='trend') drawTrend(); }, 150); });
+
+/* ===== settings / setup ===== */
+const isStandalone = () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; });
+window.addEventListener('appinstalled', () => { deferredPrompt = null; toast('ติดตั้งแอพแล้ว'); });
+
+function setupFormHTML(){
+  const c = cfg() || {};
+  return `<div class="field"><label for="s_url">ลิงก์ Web App (ลงท้าย /exec)</label><input class="inp sm" id="s_url" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://script.google.com/macros/s/…/exec" value="${esc(c.url||'')}"></div>
+    <div class="field"><label for="s_tok">รหัส token</label><input class="inp sm" id="s_tok" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="ได้จากการรัน setupToken" value="${esc(c.token||'')}"></div>
+    <div class="err" id="s_err" role="alert"></div>`;
+}
+function bindSetup(onDone){
+  const go = $('#s_go');
+  go.onclick = async () => {
+    const url = $('#s_url').value.trim(), token = $('#s_tok').value.trim();
+    if (!/^https:\/\/script\.google(usercontent)?\.com\/.+/.test(url)) { $('#s_err').textContent='ลิงก์ไม่ถูกต้อง — ต้องเป็นลิงก์ Web App ที่ขึ้นต้น https://script.google.com/…'; return; }
+    if (!token) { $('#s_err').textContent='ใส่ token'; return; }
+    go.disabled = true; go.textContent = 'กำลังเชื่อมต่อ…'; $('#s_err').textContent='';
+    const old = cfg(); secSet('pr_url',url); secSet('pr_token',token);
+    try { const d = await api('getData'); ingest(d); writeCache(d); closeSheet(); document.body.classList.remove('setup'); setBanner(null); render(); toast('เชื่อมต่อแล้ว'); if (onDone) onDone(); }
+    catch(e){ if(old){ secSet('pr_url',old.url); secSet('pr_token',old.token); } else { secDel('pr_url'); secDel('pr_token'); }
+      $('#s_err').textContent = errText(e); go.disabled=false; go.textContent='เชื่อมต่อ'; }
+  };
+}
+function showSetup(msg){
+  document.body.classList.add('setup'); $('#monthbar').classList.add('hide'); $('#payby').classList.add('hide');
+  $('#main').innerHTML = `<section class="glass setupcard"><h2>เชื่อมต่อกับชีทของคุณ</h2>
+    <p>ใส่ลิงก์ Web App และ token จาก Apps Script ครั้งเดียว ระบบจะจำไว้ในเครื่องนี้เท่านั้น</p>${setupFormHTML()}
+    <div class="actions"><button class="btn primary" id="s_go">เชื่อมต่อ</button></div></section>`;
+  if (msg) $('#s_err').textContent = msg;
+  bindSetup();
+}
+function installHTML(){
+  if (isStandalone()) return `<div class="hint">ติดตั้งเป็นแอพบนเครื่องนี้แล้ว ✓</div>`;
+  if (deferredPrompt) return `<button class="btn primary" id="s_install" style="width:100%">ติดตั้งแอพ (ปักไว้หน้าจอโฮม)</button>`;
+  if (isIOS()) return `<ol class="steps"><li>เปิดลิงก์นี้ใน <b>Safari</b></li><li>แตะปุ่ม <b>แชร์</b> (ไอคอนสี่เหลี่ยมมีลูกศรขึ้น)</li><li>เลือก <b>เพิ่มลงหน้าจอโฮม</b> แล้วกด <b>เพิ่ม</b></li></ol>`;
+  return `<ol class="steps"><li>เปิดเมนูของเบราว์เซอร์ (⋮)</li><li>เลือก <b>ติดตั้งแอพ</b> หรือ <b>เพิ่มลงหน้าจอหลัก</b></li></ol>`;
+}
+function openSettings(){
+  openSheet(`<div class="grab"></div><h3>ตั้งค่า</h3><div class="sub">การเชื่อมต่อกับ Google Sheet</div>${setupFormHTML()}
+    <div class="actions"><button class="btn primary" id="s_go">บันทึกและเชื่อมต่อ</button></div>
+    ${lockSectionHTML()}
+    <div class="sect2">ติดตั้งเป็นแอพ</div>${installHTML()}
+    <div class="sect2">ออกจากระบบ</div><div class="hint" style="margin:0 0 8px">ลบลิงก์ token และข้อมูลที่แคชไว้ในเครื่องนี้ (ไม่กระทบชีท)</div>
+    <div class="actions"><button class="btn ghost" id="s_out" style="flex:1">ออกจากระบบเครื่องนี้</button></div>`);
+  bindSetup(); bindLock();
+  const ins = $('#s_install'); if (ins) ins.onclick = async () => { deferredPrompt.prompt(); try{ await deferredPrompt.userChoice; }catch(e){} deferredPrompt=null; closeSheet(); };
+  $('#s_out').onclick = () => { wipeLocal(); S.data=null; S.y=null; closeSheet(); showSetup(); };
+}
+
+
+/* ===== ล็อกแอพ: PIN + สแกนนิ้ว/Face ID ===== */
+const cryptoOK = !!(window.crypto && crypto.subtle && window.isSecureContext);
+let bioOK = false;
+if (window.PublicKeyCredential && PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable) PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().then(v=>{ bioOK=!!v; }).catch(()=>{});
+const b64 = u8 => btoa(String.fromCharCode(...u8));
+const unb64 = t => Uint8Array.from(atob(t), c=>c.charCodeAt(0));
+const rand = n => crypto.getRandomValues(new Uint8Array(n));
+const lockMeta = () => { try{ return JSON.parse(store.get('pr_lock')||'null') || {}; }catch(e){ return {}; } };
+const saveMeta = m => store.set('pr_lock', JSON.stringify(m));
+async function deriveKey(pin, salt, iter){
+  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pin), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({ name:'PBKDF2', salt, iterations:iter, hash:'SHA-256' }, base, { name:'AES-GCM', length:256 }, false, ['encrypt','decrypt']);
+}
+async function encBytes(key, bytes){ const iv=rand(12); const ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,bytes)); return { iv:b64(iv), ct:b64(ct) }; }
+async function decBytes(key, o){ return new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(o.iv)},key,unb64(o.ct))); }
+const enc = (key, text) => encBytes(key, new TextEncoder().encode(text));
+const dec = async (key, o) => new TextDecoder().decode(await decBytes(key, o));
+const importDK = raw => crypto.subtle.importKey('raw', raw, 'AES-GCM', true, ['encrypt','decrypt']);
+
+async function unwrapWithPin(pin){
+  const m = lockMeta(); if (!m.salt) return null;
+  try { const pk = await deriveKey(pin, unb64(m.salt), m.iter); return await importDK(await decBytes(pk, m.wrapped)); } catch(e){ return null; }
+}
+async function enableLock(pin){
+  const dk = await crypto.subtle.generateKey({name:'AES-GCM',length:256}, true, ['encrypt','decrypt']);
+  const salt = rand(16), iter = 200000, pk = await deriveKey(pin, salt, iter);
+  const wrapped = await encBytes(pk, new Uint8Array(await crypto.subtle.exportKey('raw', dk)));
+  const mem = {}; SEC_KEYS.forEach(k=>{ const v=store.get(k); if (v!=null) mem[k]=v; });
+  store.set('pr_sec', JSON.stringify(await enc(dk, JSON.stringify(mem))));
+  saveMeta({ salt:b64(salt), iter, wrapped, timeout:60 });
+  SEC.on = true; SEC.key = dk; SEC.mem = mem; SEC_KEYS.forEach(store.del);
+}
+async function rewrap(newPin){
+  const m = lockMeta(), salt = rand(16), pk = await deriveKey(newPin, salt, m.iter);
+  m.salt = b64(salt); m.wrapped = await encBytes(pk, new Uint8Array(await crypto.subtle.exportKey('raw', SEC.key))); saveMeta(m);
+}
+function disableLock(){
+  Object.entries(SEC.mem).forEach(([k,v])=>store.set(k,v));
+  store.del('pr_lock'); store.del('pr_sec'); store.del('pr_fail'); SEC.on=false; SEC.key=null; SEC.mem={};
+  $('#lockbtn').classList.add('hide');
+}
+function wipeLocal(){ ['pr_url','pr_token','pr_cache','pr_lock','pr_sec','pr_fail','pr_hint'].forEach(store.del); SEC.on=false; SEC.key=null; SEC.mem={}; $('#lockbtn').classList.add('hide'); document.body.classList.remove('locked'); }
+
+/* --- แป้นตัวเลข --- */
+const FP_SVG = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 11v3.5c0 2.5-.7 4.5-2 6"/><path d="M8 14.5c0 1.6-.3 3-.9 4.3"/><path d="M16 12a4 4 0 0 0-8 0"/><path d="M5.2 9.2A7.5 7.5 0 0 1 19 12c0 3-.5 5.5-1.5 7.5"/><path d="M12 14.5c0 2.2-.4 4-1.2 5.5"/><path d="M16 15c0 1.8-.2 3.3-.7 4.7"/></svg>';
+let PAD = null;
+function pinPad(o){
+  const el = $('#lock'); let v = '', busy = false, msg = o.sub || '', isErr = false;
+  const keys = ['1','2','3','4','5','6','7','8','9','bio','0','del'];
+  const draw = () => { el.innerHTML = `<div class="lk"><div class="lkicon"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="3"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg></div>
+    <h2>${esc(o.title)}</h2><div class="lksub ${isErr?'err':''}" role="status">${esc(msg)}</div>
+    <div class="dots" id="lkd" role="img" aria-label="กรอกแล้ว ${v.length} จาก 6 หลัก">${[0,1,2,3,4,5].map(i=>`<i class="${i<v.length?'on':''}"></i>`).join('')}</div>
+    <div class="pad">${keys.map(k => k==='bio' ? (o.bio?`<button class="k ic" data-k="bio" aria-label="ปลดล็อกด้วยลายนิ้วมือหรือ Face ID">${FP_SVG}</button>`:'<span></span>') : k==='del' ? '<button class="k ic" data-k="del" aria-label="ลบหนึ่งหลัก">⌫</button>' : `<button class="k" data-k="${k}">${k}</button>`).join('')}</div>
+    ${o.cancel?'<button class="lkc" data-k="cancel">ยกเลิก</button>':''}</div>`; };
+  const press = async k => {
+    if (busy) return;
+    if (k==='cancel') { hideLock(); return; }
+    if (k==='bio') { if (o.bio) o.bio(); return; }
+    if (k==='del') v = v.slice(0,-1); else if (v.length < 6) v += k;
+    isErr = false; if (v.length < 6) msg = o.sub || ''; draw();
+    if (v.length === 6) {
+      busy = true; const pin = v; const err = await o.submit(pin); busy = false;
+      if (err) { v=''; msg=err; isErr=true; draw(); const d=$('#lkd'); if(d){ d.classList.add('shake'); } if (navigator.vibrate) try{navigator.vibrate(60)}catch(_){} }
+    }
+  };
+  PAD = { press, cancel: !!o.cancel };
+  el.onclick = e => { const b = e.target.closest('[data-k]'); if (b) press(b.dataset.k); };
+  draw(); el.classList.add('on'); document.body.classList.add('locked-ui');
+}
+document.addEventListener('keydown', e => {
+  if (!PAD || !$('#lock').classList.contains('on')) return;
+  if (/^[0-9]$/.test(e.key)) PAD.press(e.key); else if (e.key==='Backspace') PAD.press('del'); else if (e.key==='Escape' && PAD.cancel) PAD.press('cancel');
+}, true);
+function hideLock(){ $('#lock').classList.remove('on'); $('#lock').innerHTML=''; PAD=null; document.body.classList.remove('locked-ui'); }
+
+/* --- ปลดล็อก --- */
+const failState = () => { try{ return JSON.parse(store.get('pr_fail')||'null') || {n:0,until:0}; }catch(e){ return {n:0,until:0}; } };
+async function finishUnlock(dk){
+  try { const blob = JSON.parse(store.get('pr_sec')||'null'); SEC.mem = blob ? JSON.parse(await dec(dk, blob)) : {}; }
+  catch(e){ return 'ข้อมูลในเครื่องเสียหาย — ออกจากระบบแล้วเชื่อมต่อใหม่'; }
+  SEC.key = dk; store.del('pr_fail'); hideLock(); document.body.classList.remove('locked');
+  $('#lockbtn').classList.remove('hide'); hiddenAt = Date.now(); load(); return null;
+}
+function showLock(){
+  document.body.classList.add('locked'); $('#monthbar').classList.add('hide'); $('#lockbtn').classList.add('hide');
+  const m = lockMeta(); const hasBio = !!(m.bio && bioOK);
+  const tryBio = async () => { authBusy = true; try { const dk = await bioGet(); if (dk) await finishUnlock(dk); } catch(e){} finally { authBusy = false; hiddenAt = Date.now(); } };
+  pinPad({ title:'ใส่ PIN เพื่อเข้าแอพ', sub:'Payment Records', bio: hasBio ? tryBio : null,
+    submit: async pin => {
+      const f = failState(); const now = Date.now();
+      if (f.until > now) return `ลองผิดหลายครั้ง รออีก ${Math.ceil((f.until-now)/1000)} วินาที`;
+      const dk = await unwrapWithPin(pin);
+      if (!dk) {
+        f.n++; if (f.n >= 10) { wipeLocal(); hideLock(); showSetup('ใส่ PIN ผิด 10 ครั้ง — ลบการเชื่อมต่อในเครื่องนี้แล้ว (ข้อมูลในชีทไม่เป็นอะไร) กรอกลิงก์และ token ใหม่'); return null; }
+        if (f.n >= 5) f.until = now + 30000 * Math.pow(2, f.n-5);
+        store.set('pr_fail', JSON.stringify(f));
+        return f.n >= 5 ? `PIN ไม่ถูกต้อง · รอ ${Math.round((f.until-now)/1000)} วินาที (ผิดแล้ว ${f.n}/10)` : `PIN ไม่ถูกต้อง (${f.n}/10)`;
+      }
+      return finishUnlock(dk);
+    } });
+  if (hasBio) setTimeout(tryBio, 350);
+}
+function lockNow(){ SEC.key = null; SEC.mem = {}; S.data = null; $('#main').innerHTML=''; closeSheet(); setBanner(null); toastHide(); showLock(); }
+const toastHide = () => $('#toast').classList.remove('on');
+
+/* --- ลายนิ้วมือ / Face ID (WebAuthn: ใช้ยืนยันตัวตนบนเครื่อง) --- */
+async function bioEnable(){
+  authBusy = true;
+  try {
+    const cred = await navigator.credentials.create({ publicKey:{ challenge:rand(32), rp:{ name:'Payment Records' }, user:{ id:rand(16), name:'payments', displayName:'Payment Records' },
+      pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}], authenticatorSelection:{ authenticatorAttachment:'platform', userVerification:'required' }, timeout:60000, attestation:'none' } });
+    const m = lockMeta(); m.bio = { id:b64(new Uint8Array(cred.rawId)), key:b64(new Uint8Array(await crypto.subtle.exportKey('raw', SEC.key))) }; saveMeta(m);
+  } finally { authBusy = false; hiddenAt = Date.now(); }
+}
+async function bioGet(){
+  const m = lockMeta(); if (!m.bio) return null;
+  await navigator.credentials.get({ publicKey:{ challenge:rand(32), allowCredentials:[{ type:'public-key', id:unb64(m.bio.id) }], userVerification:'required', timeout:60000 } });
+  return importDK(unb64(m.bio.key));
+}
+
+/* --- หน้าตั้งค่าล็อก --- */
+function setPinFlow(done){
+  pinPad({ title:'ตั้ง PIN 6 หลัก', sub:'ใช้ปลดล็อกก่อนเข้าแอพ', cancel:true, submit: async p1 => {
+    pinPad({ title:'ยืนยัน PIN อีกครั้ง', sub:'', cancel:true, submit: async p2 => {
+      if (p2 !== p1) return 'PIN ไม่ตรงกัน ลองใหม่';
+      await done(p1); hideLock(); openSettings(); return null; } });
+    return null; } });
+}
+function askCurrentPin(then){
+  pinPad({ title:'ใส่ PIN ปัจจุบัน', sub:'', cancel:true, submit: async p => { const dk = await unwrapWithPin(p); if (!dk) return 'PIN ไม่ถูกต้อง'; hideLock(); then(); return null; } });
+}
+function lockSectionHTML(){
+  if (!cryptoOK) return '';
+  if (!SEC.on) return `<div class="sect2">ล็อกแอพ</div><div class="hint" style="margin:0 0 8px">ตั้ง PIN 6 หลัก (และสแกนนิ้ว/Face ID) ก่อนเข้าแอพ — ลิงก์และ token ในเครื่องจะถูกเข้ารหัส</div><div class="actions"><button class="btn ghost" id="l_set" style="flex:1">ตั้ง PIN</button></div>`;
+  const m = lockMeta();
+  return `<div class="sect2">ล็อกแอพ <span class="badge">เปิดอยู่</span></div>
+    <div class="field" style="margin:6px 0 10px"><label for="l_to">ล็อกอัตโนมัติเมื่อออกจากแอพ</label><select class="select" id="l_to" style="width:100%"><option value="0">ทันที</option><option value="60">หลัง 1 นาที</option><option value="300">หลัง 5 นาที</option></select></div>
+    <div class="actions" style="flex-wrap:wrap">${bioOK?`<button class="btn ghost" id="l_bio" style="flex:1 1 100%">${m.bio?'ปิดลายนิ้วมือ / Face ID':'เปิดลายนิ้วมือ / Face ID'}</button>`:''}<button class="btn ghost" id="l_chg" style="flex:1">เปลี่ยน PIN</button><button class="btn ghost" id="l_off" style="flex:1">ปิดการล็อก</button></div>`;
+}
+function bindLock(){
+  const q = id => document.getElementById(id);
+  if (q('l_set')) q('l_set').onclick = () => setPinFlow(async p => { await enableLock(p); $('#lockbtn').classList.remove('hide'); toast('เปิดการล็อกแอพแล้ว'); });
+  if (q('l_to')) { q('l_to').value = String(lockMeta().timeout || 0); q('l_to').onchange = e => { const m = lockMeta(); m.timeout = +e.target.value; saveMeta(m); toast('บันทึกแล้ว'); }; }
+  if (q('l_bio')) q('l_bio').onclick = async () => {
+    const m = lockMeta();
+    if (m.bio) { delete m.bio; saveMeta(m); openSettings(); toast('ปิดลายนิ้วมือ / Face ID แล้ว'); return; }
+    try { await bioEnable(); openSettings(); toast('เปิดลายนิ้วมือ / Face ID แล้ว'); } catch(e){ toast('เปิดไม่สำเร็จ: ' + (e && e.name==='NotAllowedError' ? 'ยกเลิกหรือไม่ได้รับอนุญาต' : (e.message||e))); }
+  };
+  if (q('l_chg')) q('l_chg').onclick = () => { closeSheet(); askCurrentPin(() => setPinFlow(async p => { await rewrap(p); toast('เปลี่ยน PIN แล้ว'); })); };
+  if (q('l_off')) q('l_off').onclick = () => { closeSheet(); askCurrentPin(() => { disableLock(); toast('ปิดการล็อกแล้ว'); openSettings(); }); };
+}
+async function boot(){
+  if (SEC.on) { if (!cryptoOK) { wipeLocal(); } else { await new Promise(r=>setTimeout(r,60)); showLock(); return; } }
+  load();
+}
+
+/* ===== cache / banner ===== */
+function writeCache(d){ secSet('pr_cache', JSON.stringify({ t: Date.now(), data: d })); }
+function readCache(){ try{ return JSON.parse(secGet('pr_cache')||'null'); }catch(e){ return null; } }
+function setBanner(t){ const b=$('#banner'); if(!t){ b.classList.add('hide'); b.textContent=''; } else { b.textContent=t; b.classList.remove('hide'); } }
+const fmtTime = t => new Date(t).toLocaleString('th-TH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+
+/* ===== boot ===== */
+document.addEventListener('click', e => {
+  if (e.target.closest('#settings')) return openSettings();
+  if (e.target.closest('#lockbtn')) return lockNow();
+  if (e.target.closest('#hintx')) { store.set('pr_hint','1'); const h=$('.hintcard'); if(h) h.remove(); }
+});
+async function load(manual){
+  if (SEC.on && !SEC.key) return;
+  const rb = $('#refresh svg'); rb.classList.add('spin');
+  try {
+    if (!cfg()) { showSetup(); return; }
+    document.body.classList.remove('setup');
+    if (!S.data) { const c = readCache(); if (c) { try { ingest(c.data); render(); setBanner('กำลังอัปเดต… (แสดงข้อมูลล่าสุดเมื่อ '+fmtTime(c.t)+')'); } catch(e){} } }
+    try {
+      const d = await api('getData'); ingest(d); writeCache(d); setBanner(null); render(); if (manual) toast('อัปเดตข้อมูลล่าสุดแล้ว');
+    } catch(e){
+      if (e.message==='UNAUTHORIZED' || e.message==='NOSETUP' || /token/.test(e.message)) { showSetup(errText(e)); return; }
+      const c = readCache();
+      if (S.data && c) setBanner('เชื่อมต่อไม่ได้ — แสดงข้อมูลล่าสุดเมื่อ '+fmtTime(c.t)+' (แก้ไขยังไม่ได้)');
+      else $('#main').innerHTML = `<div class="glass list" style="margin-top:14px"><div class="empty">โหลดข้อมูลไม่สำเร็จ<br><small>${esc(errText(e))}</small><br><br><button class="btn primary" onclick="load(true)">ลองอีกครั้ง</button></div></div>`;
+    }
+  } finally { rb.classList.remove('spin'); }
+}
+window.addEventListener('online', () => { if (S.data) load(); });
+let hiddenAt = 0, authBusy = false;
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') { hiddenAt = Date.now(); return; }
+  if (authBusy) return;
+  if (SEC.on && SEC.key) { const m = lockMeta(); if (Date.now() - hiddenAt >= (m.timeout||0)*1000) { lockNow(); return; } }
+  if (S.data && !$('#sheet').classList.contains('on') && !$('#lock').classList.contains('on')) load();
+});
+boot();
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
